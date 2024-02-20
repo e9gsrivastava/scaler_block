@@ -1,7 +1,14 @@
+"""
+Showing block_value, scalar
+"""
 from datetime import datetime
 from csv import DictReader, DictWriter
 
+
 def read_hourly_prices(file_path):
+    """
+    Reads hourly prices from a CSV file.
+    """
     with open(file_path, "r", encoding="utf-8") as file:
         reader = DictReader(file)
         data = [
@@ -13,48 +20,55 @@ def read_hourly_prices(file_path):
         ]
     return data
 
-def calculate_peak_block_by_hour(hourly_prices_path):
-    data = read_hourly_prices(hourly_prices_path)
 
-    grouped_data = {}
-    days_in_month = {}
+def calculate_block_and_scalar(data):
+    """
+    Calculates block values and scalars for each hour
+    """
+    hourly_data = {}
 
     for entry in data:
-        month_key = entry["date"].strftime("%Y-%m")
-        hour_key = entry["date"].hour
+        hour_key = entry["date"].strftime("%H:00:00")
+        hourly_data.setdefault(hour_key, {"sum": 0, "count": 0})
+        hourly_data[hour_key]["sum"] += entry["price"]
+        hourly_data[hour_key]["count"] += 1
 
-        if month_key not in grouped_data:
-            grouped_data[month_key] = {hour: 0 for hour in range(24)}
-            days_in_month[month_key] = set()
+    block_values = {
+        key: data["sum"] / data["count"] for key, data in hourly_data.items()
+    }
 
-        # Consider it for the sum
-        grouped_data[month_key][hour_key] += entry["price"]
+    block_and_scalar_data = []
 
-        # Check if the entry is the first hour of the day
-        if entry["date"].hour == 0:
-            days_in_month[month_key].add(entry["date"].day)
+    for entry in data:
+        hour_key = entry["date"].strftime("%H:00:00")
+        block_value = block_values[hour_key]
+        scalar = entry["price"] / block_value if block_value != 0 else 0
 
-    # Divide the sum by the number of days in each month
-    for month_key in grouped_data:
-        for hour in grouped_data[month_key]:
-            if hour in days_in_month[month_key]:
-                grouped_data[month_key][hour] /= len(days_in_month[month_key])
+        block_and_scalar_data.append(
+            {
+                "date": entry["date"].strftime("%Y-%m-%d %H:00:00"),
+                "block_value": round(block_value, 2),
+                "scalar": round(scalar, 2),
+            }
+        )
 
-    return grouped_data
+    return block_and_scalar_data
 
-def write_peak_block_by_hour_to_csv(grouped_data, output_file_path):
+
+def write_block_and_scalar_to_csv(data, output_file_path):
+    """
+    Writes block and scalar data to a CSV file.
+    """
     with open(output_file_path, "w", newline="", encoding="utf-8") as output_file:
-        writer = DictWriter(output_file, fieldnames=["date", "block_value"])
+        writer = DictWriter(output_file, fieldnames=["date", "block_value", "scalar"])
         writer.writeheader()
-        for month_key, month_data in grouped_data.items():
-            for hour, price in month_data.items():
-                row = {"date": f"{month_key}-{hour:02d}", "block_value": round(price, 2)}
-                writer.writerow(row)
+        writer.writerows(data)
+
 
 if __name__ == "__main__":
-    hourly_prices_path = "hourly_prices.csv"
+    HOURLYPATH = "hourly_prices.csv"
+    dataa = read_hourly_prices(HOURLYPATH)
+    block_and_scalar_dataa = calculate_block_and_scalar(dataa)
 
-    grouped_data = calculate_peak_block_by_hour(hourly_prices_path)
-
-    output_file_path = "peak_block_by_hour.csv"
-    write_peak_block_by_hour_to_csv(grouped_data, output_file_path)
+    OUTPUTPATH = "block_and_scalar_results.csv"
+    write_block_and_scalar_to_csv(block_and_scalar_dataa, OUTPUTPATH)
