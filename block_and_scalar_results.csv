@@ -1,4 +1,4 @@
-date,month,block_value,block_type,block_type_value,new_scalar
+date,month,av_price,block_type,block_value,scalar
 2022-01-01 00:00:00,1,31.19,Off-Peak,26.61,1.17
 2022-01-01 01:00:00,1,24.58,Off-Peak,26.61,0.92
 2022-01-01 02:00:00,1,24.55,Off-Peak,26.61,0.92

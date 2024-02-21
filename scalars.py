@@ -115,12 +115,12 @@ def calculate_block_and_scalar(data):
                 {
                     "date": entry["date"].strftime("%Y-%m-%d %H:00:00"),
                     "month": month,
-                    "block_value": round(block_value, 2),
+                    "av_price": round(block_value, 2),
                     "block_type": "Peak" if hour_key in peak_hour_keys else "Off-Peak",
-                    "block_type_value": peak_block_value
+                    "block_value": peak_block_value
                     if hour_key in peak_hour_keys
                     else off_peak_block_value,
-                    "new_scalar": round(new_scalar, 2),
+                    "scalar": round(new_scalar, 2),
                 }
             )
 
@@ -137,10 +137,10 @@ def write_block_and_scalar_to_csv(data, output_file_path):
             fieldnames=[
                 "date",
                 "month",
-                "block_value",
+                "av_price",
                 "block_type",
-                "block_type_value",
-                "new_scalar",
+                "block_value",
+                "scalar",
             ],
         )
         writer.writeheader()
