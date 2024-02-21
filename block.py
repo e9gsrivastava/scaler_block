@@ -73,3 +73,4 @@ if __name__ == "__main__":
     result = calculate_blocks_and_scalars(PRICESPATH)
     OUTPUTPATH = "average_blocks.csv"
     write_to_csv(result, OUTPUTPATH)
+    print(result)
